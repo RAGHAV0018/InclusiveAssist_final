@@ -20,6 +20,8 @@ public class MainActivity extends AppCompatActivity {
         // 1. Find the buttons from the design
         btnBlind = findViewById(R.id.btnIamBlind);
         btnDeaf = findViewById(R.id.btnIamDeaf);
+        Button btnLocation = findViewById(R.id.btnWhereAmI);
+        Button btnQuick = findViewById(R.id.btnQuickMessages);
 
         // 2. Setup Text to Speech
         tts = new TextToSpeech(this, status -> {
@@ -41,6 +43,18 @@ public class MainActivity extends AppCompatActivity {
             // No voice needed for deaf mode, just open the page
             Intent intent = new Intent(MainActivity.this, DeafMenuActivity.class);
             startActivity(intent);
+        });
+
+        // 5. Make the Where Am I Button work
+        btnLocation.setOnClickListener(v -> {
+            speak("Opening Location");
+            startActivity(new Intent(MainActivity.this, LocationActivity.class));
+        });
+
+        // 6. Make the Quick Messages Button work
+        btnQuick.setOnClickListener(v -> {
+            speak("Opening Quick Messages");
+            startActivity(new Intent(MainActivity.this, QuickTextActivity.class));
         });
     }
 

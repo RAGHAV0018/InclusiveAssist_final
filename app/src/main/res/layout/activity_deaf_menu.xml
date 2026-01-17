@@ -32,16 +32,6 @@
             android:layout_marginBottom="20dp"/>
 
         <Button
-            android:id="@+id/btnQuickText"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:text="💬  Quick Messages"
-            android:textSize="22sp"
-            android:backgroundTint="#4CAF50"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="20dp"/>
-
-        <Button
             android:id="@+id/btnSoundAlerts"
             android:layout_width="match_parent"
             android:layout_height="80dp"
@@ -58,26 +48,6 @@
             android:text="🎓  Classroom Mode"
             android:textSize="22sp"
             android:backgroundTint="#607D8B"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="20dp"/>
-
-        <Button
-            android:id="@+id/btnLocation"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:text="📍  Where Am I?"
-            android:textSize="22sp"
-            android:backgroundTint="#9C27B0"
-            android:textColor="#FFFFFF"
-            android:layout_marginBottom="20dp"/>
-
-        <Button
-            android:id="@+id/btnDeafSOS"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:text="🆘  Emergency SOS"
-            android:textSize="22sp"
-            android:backgroundTint="#F44336"
             android:textColor="#FFFFFF"
             android:layout_marginBottom="20dp"/>
 

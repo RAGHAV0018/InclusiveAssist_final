@@ -18,34 +18,16 @@ public class DeafMenuActivity extends AppCompatActivity {
             startActivity(new Intent(this, SpeechToTextActivity.class));
         });
 
-        // 2. Quick Messages
-        Button btnQuick = findViewById(R.id.btnQuickText);
-        btnQuick.setOnClickListener(v -> {
-            startActivity(new Intent(this, QuickTextActivity.class));
-        });
-
-        // 3. Sound Detector
+        // 2. Sound Detector
         Button btnSound = findViewById(R.id.btnSoundAlerts);
         btnSound.setOnClickListener(v -> {
             startActivity(new Intent(this, SoundAlertActivity.class));
         });
 
-        // 4. Classroom Mode
+        // 3. Classroom Mode
         Button btnClass = findViewById(R.id.btnClassroom);
         btnClass.setOnClickListener(v -> {
             startActivity(new Intent(this, ClassroomModeActivity.class));
-        });
-
-        // 5. Visual Location
-        Button btnLoc = findViewById(R.id.btnLocation);
-        btnLoc.setOnClickListener(v -> {
-            startActivity(new Intent(this, VisualLocationActivity.class));
-        });
-
-        // 6. Emergency SOS
-        Button btnSos = findViewById(R.id.btnDeafSOS);
-        btnSos.setOnClickListener(v -> {
-            startActivity(new Intent(this, DeafSOSActivity.class));
         });
     }
 }

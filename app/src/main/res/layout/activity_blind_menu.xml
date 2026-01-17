@@ -58,10 +58,10 @@
             android:layout_marginBottom="15dp"/>
 
         <Button
-            android:id="@+id/btnLocation"
+            android:id="@+id/btnAssistant"
             android:layout_width="match_parent"
             android:layout_height="70dp"
-            android:text="📍  Where Am I?"
+            android:text="🤖  AI Assistant"
             android:textSize="20sp"
             android:backgroundTint="#9C27B0"
             android:layout_marginBottom="15dp"/>

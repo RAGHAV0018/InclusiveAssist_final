@@ -11,6 +11,11 @@ import android.os.Bundle;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
+/**
+ * Activity for "Light Detector" feature.
+ * Uses the device's Ambient Light Sensor.
+ * Beeps faster as the light gets brighter.
+ */
 public class LightDetectorActivity extends AppCompatActivity implements SensorEventListener {
 
     private SensorManager sensorManager;

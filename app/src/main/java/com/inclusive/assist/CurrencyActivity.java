@@ -26,6 +26,11 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Activity for "Check Money" feature (Blind Mode).
+ * Uses ML Kit Text Recognition to find specific numbers and text on Indian Currency notes.
+ * Logic: Looks for "reserve bank" AND a denomination number (e.g., 500, 100).
+ */
 public class CurrencyActivity extends AppCompatActivity {
 
     private TextToSpeech tts;

@@ -14,8 +14,8 @@ import android.view.View;
  * - Text Reading (ReadTextActivity)
  * - Object Detection (BlindModeActivity)
  * - Currency Recognition (CurrencyActivity)
+ * - Currency Recognition (CurrencyActivity)
  * - Light Detection (LightDetectorActivity)
- * - Location/SOS (LocationActivity)
  *
  * Implements Swipe Gestures for easier navigation.
  */
@@ -43,7 +43,7 @@ public class BlindMenuActivity extends AppCompatActivity {
             @Override
             public void onSwipeRight() {
                 // Feature: SWIPE RIGHT TO REPEAT INSTRUCTIONS
-                speak("Menu Open. Options are: Read Text, Currency, Object, Light, Location.");
+                speak("Menu Open. Options are: Read Text, Currency, Object, Light.");
             }
         });
 
@@ -87,15 +87,6 @@ public class BlindMenuActivity extends AppCompatActivity {
             btnLight.setOnClickListener(v -> {
                 speak("Opening Light Detector");
                 startActivity(new Intent(this, LightDetectorActivity.class));
-            });
-        }
-
-        // 5. LOCATION BUTTON (Where Am I?)
-        Button btnLocation = findViewById(R.id.btnLocation);
-        if (btnLocation != null) {
-            btnLocation.setOnClickListener(v -> {
-                speak("Checking Location...");
-                startActivity(new Intent(this, LocationActivity.class));
             });
         }
 

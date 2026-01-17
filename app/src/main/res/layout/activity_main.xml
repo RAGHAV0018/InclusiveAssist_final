@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:weightSum="2"
+    android:weightSum="4"
     android:background="#000000">
 
     <Button
@@ -16,6 +16,7 @@
         android:textStyle="bold"
         android:backgroundTint="#2196F3"
         android:textColor="#FFFFFF"/>
+
     <Button
         android:id="@+id/btnIamDeaf"
         android:layout_width="match_parent"
@@ -25,5 +26,27 @@
         android:textSize="30sp"
         android:textStyle="bold"
         android:backgroundTint="#FF9800"
+        android:textColor="#FFFFFF"/>
+
+    <Button
+        android:id="@+id/btnWhereAmI"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="WHERE AM I?"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:backgroundTint="#9C27B0"
+        android:textColor="#FFFFFF"/>
+
+    <Button
+        android:id="@+id/btnQuickMessages"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="QUICK MESSAGES"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:backgroundTint="#4CAF50"
         android:textColor="#FFFFFF"/>
 </LinearLayout>
