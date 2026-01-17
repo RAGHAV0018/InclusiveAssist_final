@@ -98,6 +98,15 @@ public class BlindMenuActivity extends AppCompatActivity {
                 startActivity(new Intent(this, LocationActivity.class));
             });
         }
+
+        // Add this inside onCreate()
+        Button btnAssistant = findViewById(R.id.btnAssistant);
+        if (btnAssistant != null) {
+            btnAssistant.setOnClickListener(v -> {
+                speak("Opening AI Assistant");
+                startActivity(new Intent(this, AIAssistantActivity.class));
+            });
+        }
     }
 
     private void speak(String text) {

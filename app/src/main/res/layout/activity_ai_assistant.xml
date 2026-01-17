@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#121212"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvChatHistory"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="AI Assistant Ready..."
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:scrollbars="vertical"
+        android:gravity="bottom"
+        android:padding="10dp"
+        android:background="#1E1E1E"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp">
+
+        <EditText
+            android:id="@+id/etInput"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:hint="Type here..."
+            android:textColor="#FFFFFF"
+            android:textColorHint="#AAAAAA"
+            android:background="#333333"
+            android:padding="10dp"/>
+
+        <Button
+            android:id="@+id/btnSend"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="SEND"
+            android:backgroundTint="#2196F3"/>
+
+        <Button
+            android:id="@+id/btnMic"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="🎤"
+            android:textSize="24sp"
+            android:backgroundTint="#4CAF50"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnModeSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Switch to Voice Mode"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="#FF5722"/>
+
+</LinearLayout>
