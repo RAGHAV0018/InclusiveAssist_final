@@ -23,10 +23,22 @@ public class BlindMenuActivity extends AppCompatActivity {
 
     private TextToSpeech tts;
 
+
+    private ShakeDetector shakeDetector;
+    private android.hardware.SensorManager sensorManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blind_menu);
+
+        sensorManager = (android.hardware.SensorManager) getSystemService(android.content.Context.SENSOR_SERVICE);
+        shakeDetector = new ShakeDetector();
+        shakeDetector.setOnShakeListener(count -> {
+            if (count >= 5) {
+                SOSHelper.triggerSOS(BlindMenuActivity.this, tts);
+            }
+        });
 
         // --- SETUP SWIPE GESTURES ---
         // We find the "Root" view (the background) to listen for swipes anywhere
@@ -98,6 +110,24 @@ public class BlindMenuActivity extends AppCompatActivity {
                 startActivity(new Intent(this, AIAssistantActivity.class));
             });
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (sensorManager != null && shakeDetector != null) {
+            sensorManager.registerListener(shakeDetector,
+                    sensorManager.getDefaultSensor(android.hardware.Sensor.TYPE_ACCELEROMETER),
+                    android.hardware.SensorManager.SENSOR_DELAY_UI);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        if (sensorManager != null && shakeDetector != null) {
+            sensorManager.unregisterListener(shakeDetector);
+        }
+        super.onPause();
     }
 
     private void speak(String text) {

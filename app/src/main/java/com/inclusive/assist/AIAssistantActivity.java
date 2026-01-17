@@ -1,5 +1,6 @@
 package com.inclusive.assist;
 
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,10 +11,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
-// --- PASTE THESE GEMINI IMPORTS ---
+// --- GEMINI IMPORTS ---
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.java.GenerativeModelFutures;
 import com.google.ai.client.generativeai.type.Content;
@@ -28,9 +31,9 @@ import java.util.Locale;
 
 public class AIAssistantActivity extends AppCompatActivity {
 
-    // --- PASTE API KEY HERE ---
-    private static final String API_KEY = "YOUR_API_KEY_HERE";
-    // --------------------------
+    // --- PASTE GEMINI API KEY HERE ---
+    private static final String API_KEY = "AIzaSyBOCKnxvyOeXFZpRgt6hQZWPqX-prhhisg";
+    // ---------------------------------
 
     private TextView tvChatHistory;
     private EditText etInput;
@@ -169,7 +172,8 @@ public class AIAssistantActivity extends AppCompatActivity {
     private void askGemini(String prompt) {
         addToChat("System: Thinking...");
 
-        GenerativeModel gm = new GenerativeModel("gemini-pro", AIzaSyBOCKnxvyOeXFZpRgt6hQZWPqX-prhhisg);
+        // Use new model name: gemini-1.5-flash
+        GenerativeModel gm = new GenerativeModel("gemini-1.5-flash", API_KEY);
         GenerativeModelFutures model = GenerativeModelFutures.from(gm);
 
         Content content = new Content.Builder()

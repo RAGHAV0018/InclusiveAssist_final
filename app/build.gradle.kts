@@ -65,6 +65,6 @@ dependencies {
     implementation("com.google.guava:guava:31.1-android")
 
 
-    //Read text- gemini api
+    // Read text- gemini api
     implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 }
