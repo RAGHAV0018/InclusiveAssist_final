@@ -42,18 +42,15 @@
 
         <activity android:name=".AIAssistantActivity" android:exported="false" />
 
+
         <activity android:name=".DeafMenuActivity" android:exported="false" />
         <activity android:name=".SpeechToTextActivity" android:exported="false" />
         <activity android:name=".QuickTextActivity" android:exported="false" />
-        <activity android:name=".DeafSOSActivity" android:exported="false" />
         <activity android:name=".SoundAlertActivity" android:exported="false" />
 
-        <activity android:name=".VisualLocationActivity" android:exported="false" />
         <activity android:name=".ClassroomModeActivity" android:exported="false" />
 
-        <activity android:name=".DeafModeActivity" android:exported="false" />
         <activity android:name=".DestinationActivity" android:exported="false" />
-
     </application>
 
 </manifest>
