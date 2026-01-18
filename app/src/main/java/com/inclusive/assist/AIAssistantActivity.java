@@ -156,7 +156,7 @@ public class AIAssistantActivity extends AppCompatActivity {
 
         // Open Dialer with 911 (or 112) pre-filled
         Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse("tel:911"));
+        intent.setData(Uri.parse("tel:7992384703"));
         startActivity(intent);
     }
 

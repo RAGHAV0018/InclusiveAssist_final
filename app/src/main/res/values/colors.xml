@@ -2,4 +2,30 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    
+    <!-- Premium Dark Theme Base -->
+    <color name="background_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="surface_dark_elevated">#2C2C2C</color>
+    
+    <!-- StartUp Brand Colors -->
+    <color name="brand_primary">#6C63FF</color> <!-- Modern Purple -->
+    <color name="brand_secondary">#03DAC6</color> <!-- Teal -->
+    <color name="brand_accent">#FF4081</color> <!-- vibrant pink for crucial actions -->
+    
+    <!-- Functional Colors (High Contrast for Accessibility) -->
+    <color name="semantic_success">#4CAF50</color>
+    <color name="semantic_warning">#FFC107</color>
+    <color name="semantic_error">#CF6679</color>
+    
+    <!-- Gradients -->
+    <color name="gradient_start_blind">#4527A0</color>
+    <color name="gradient_end_blind">#7B1FA2</color>
+    
+    <color name="gradient_start_deaf">#00695C</color>
+    <color name="gradient_end_deaf">#004D40</color>
+    
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+
 </resources>

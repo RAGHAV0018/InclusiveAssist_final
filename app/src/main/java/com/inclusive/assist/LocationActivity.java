@@ -48,6 +48,7 @@ public class LocationActivity extends AppCompatActivity {
         tvLocation = findViewById(R.id.tvLocation);
         etEmergencyContact = findViewById(R.id.etEmergencyContact);
         Button btnShare = findViewById(R.id.btnShare);
+        Button btnDestination = findViewById(R.id.btnDestination); // NEW
         Button btnSOS = findViewById(R.id.btnSOS);
         Button btnSaveContact = findViewById(R.id.btnSaveContact);
 
@@ -67,6 +68,7 @@ public class LocationActivity extends AppCompatActivity {
 
         // 3. Setup Buttons
         btnShare.setOnClickListener(v -> shareLocation());
+        btnDestination.setOnClickListener(v -> startActivity(new Intent(this, DestinationActivity.class))); // NEW
         btnSaveContact.setOnClickListener(v -> saveEmergencyNumber());
         btnSOS.setOnClickListener(v -> triggerSOS());
     }

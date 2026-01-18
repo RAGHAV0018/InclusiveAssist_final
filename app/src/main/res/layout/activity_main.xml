@@ -1,52 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:weightSum="4"
-    android:background="#000000">
+    android:background="@color/background_dark"
+    android:fillViewport="true">
 
-    <Button
-        android:id="@+id/btnIamBlind"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="I AM BLIND\n(Tap to Enter)"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:backgroundTint="#2196F3"
-        android:textColor="#FFFFFF"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <Button
-        android:id="@+id/btnIamDeaf"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="I AM DEAF"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:backgroundTint="#FF9800"
-        android:textColor="#FFFFFF"/>
+        <!-- Header Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Inclusive Assist"
+            android:textColor="@color/brand_primary"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp" />
 
-    <Button
-        android:id="@+id/btnWhereAmI"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="WHERE AM I?"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:backgroundTint="#9C27B0"
-        android:textColor="#FFFFFF"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Empowering Everyone, Everywhere."
+            android:textColor="@color/text_secondary"
+            android:textSize="16sp"
+            android:layout_marginBottom="48dp" />
 
-    <Button
-        android:id="@+id/btnQuickMessages"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:text="QUICK MESSAGES"
-        android:textSize="26sp"
-        android:textStyle="bold"
-        android:backgroundTint="#4CAF50"
-        android:textColor="#FFFFFF"/>
-</LinearLayout>
+        <!-- Main Action Cards -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:clipChildren="false">
+
+            <!-- Blind Mode Card -->
+            <Button
+                android:id="@+id/btnIamBlind"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:background="@drawable/btn_gradient_blind"
+                android:text="I AM BLIND"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:elevation="8dp"
+                android:stateListAnimator="@null"
+                android:layout_marginBottom="24dp" />
+
+            <!-- Deaf Mode Card -->
+            <Button
+                android:id="@+id/btnIamDeaf"
+                android:layout_width="match_parent"
+                android:layout_height="140dp"
+                android:background="@drawable/btn_gradient_deaf"
+                android:text="I AM DEAF"
+                android:textColor="@color/white"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:elevation="8dp"
+                android:stateListAnimator="@null"
+                android:layout_marginBottom="32dp" />
+
+        </LinearLayout>
+
+        <!-- Quick Access Section Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Quick Access"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Grid for Secondary Actions -->
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="2"
+            android:rowCount="1">
+
+            <!-- Where Am I -->
+            <Button
+                android:id="@+id/btnWhereAmI"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_columnWeight="1"
+                android:layout_marginEnd="8dp"
+                android:text="WHERE\nAM I?"
+                android:textSize="16sp"
+                android:backgroundTint="@color/surface_dark_elevated"
+                android:textColor="@color/brand_secondary"
+                android:elevation="4dp" />
+
+            <!-- Quick Messages -->
+            <Button
+                android:id="@+id/btnQuickMessages"
+                android:layout_width="0dp"
+                android:layout_height="100dp"
+                android:layout_columnWeight="1"
+                android:layout_marginStart="8dp"
+                android:text="QUICK\nMESSAGES"
+                android:textSize="16sp"
+                android:backgroundTint="@color/surface_dark_elevated"
+                android:textColor="@color/brand_secondary"
+                android:elevation="4dp" />
+
+        </GridLayout>
+
+    </LinearLayout>
+</ScrollView>

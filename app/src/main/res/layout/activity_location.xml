@@ -39,6 +39,17 @@
         android:textColor="#FFFFFF"
         android:layout_marginBottom="24dp" />
 
+    <!-- DESTINATION ALARM BUTTON -->
+    <Button
+        android:id="@+id/btnDestination"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:text="DESTINATION ALARM"
+        android:textSize="24sp"
+        android:backgroundTint="#FF9800"
+        android:textColor="#FFFFFF"
+        android:layout_marginBottom="24dp" />
+
     <!-- EMERGENCY CONTACT INPUT -->
     <TextView
         android:layout_width="match_parent"

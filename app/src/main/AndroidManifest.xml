@@ -52,6 +52,7 @@
         <activity android:name=".ClassroomModeActivity" android:exported="false" />
 
         <activity android:name=".DeafModeActivity" android:exported="false" />
+        <activity android:name=".DestinationActivity" android:exported="false" />
 
     </application>
 
