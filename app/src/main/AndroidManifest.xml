@@ -40,6 +40,7 @@
         <activity android:name=".LocationActivity" android:exported="false" />
         <activity android:name=".LightDetectorActivity" android:exported="false" />
 
+        <activity android:name=".SceneDescriptionActivity" android:exported="false" />
         <activity android:name=".AIAssistantActivity" android:exported="false" />
 
 

@@ -14,6 +14,20 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Read local.properties
+        val localProperties = java.util.Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localProperties.load(java.io.FileInputStream(localPropertiesFile))
+        }
+
+        buildConfigField("String", "GEMINI_API_KEY", "\"${localProperties.getProperty("GEMINI_API_KEY")}\"")
+        buildConfigField("String", "GROQ_API_KEY", "\"${localProperties.getProperty("GROQ_API_KEY")}\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     // CRITICAL: This keeps your model files safe
@@ -50,19 +64,16 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:1.3.1")
     implementation("androidx.camera:camera-view:1.3.1")
 
-    // TensorFlow Lite - Object Detection
-    implementation("org.tensorflow:tensorflow-lite:2.14.0")
-    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
-    implementation("org.tensorflow:tensorflow-lite-gpu:2.14.0")
-
     // ML Kit Text Recognition (Reads English text instantly) - Keeping this for other features
     implementation("com.google.mlkit:text-recognition:16.0.0")
+    // ML Kit Image Labeling (Better descriptions: "Cup", "Laptop", "Person")
+    implementation("com.google.mlkit:image-labeling:17.0.7")
 
     //location
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
     implementation("com.google.guava:guava:31.1-android")
 
-    // Read text- gemini api
-    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    // Network for Groq API
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }

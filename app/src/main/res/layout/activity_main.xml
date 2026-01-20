@@ -43,9 +43,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="140dp"
                 android:background="@drawable/btn_gradient_blind"
-                android:text="I AM BLIND"
+                android:text="VISUALLY IMPAIRED"
                 android:textColor="@color/white"
-                android:textSize="28sp"
+                android:textSize="26sp"
                 android:textStyle="bold"
                 android:gravity="center"
                 android:elevation="8dp"
@@ -58,9 +58,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="140dp"
                 android:background="@drawable/btn_gradient_deaf"
-                android:text="I AM DEAF"
+                android:text="HEARING IMPAIRED"
                 android:textColor="@color/white"
-                android:textSize="28sp"
+                android:textSize="26sp"
                 android:textStyle="bold"
                 android:gravity="center"
                 android:elevation="8dp"
@@ -113,6 +113,21 @@
                 android:elevation="4dp" />
 
         </GridLayout>
+
+        <!-- Voice Assistant Button -->
+        <Button
+            android:id="@+id/btnVoiceAssistant"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginTop="32dp"
+            android:backgroundTint="#FF5722"
+            android:text="VOICE ASSISTANT"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:drawableStart="@android:drawable/ic_btn_speak_now"
+            android:padding="16dp"
+            android:elevation="6dp"/>
 
     </LinearLayout>
 </ScrollView>

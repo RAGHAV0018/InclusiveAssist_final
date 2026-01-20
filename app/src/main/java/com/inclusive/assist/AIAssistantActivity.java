@@ -1,6 +1,5 @@
 package com.inclusive.assist;
 
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,20 +9,22 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
-// --- GEMINI IMPORTS ---
-import com.google.ai.client.generativeai.GenerativeModel;
-import com.google.ai.client.generativeai.java.GenerativeModelFutures;
-import com.google.ai.client.generativeai.type.Content;
-import com.google.ai.client.generativeai.type.GenerateContentResponse;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+// --- GROQ IMPORTS ---
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -31,8 +32,8 @@ import java.util.Locale;
 
 public class AIAssistantActivity extends AppCompatActivity {
 
-    // --- PASTE GEMINI API KEY HERE ---
-    private static final String API_KEY = "AIzaSyBOCKnxvyOeXFZpRgt6hQZWPqX-prhhisg";
+    // --- GROQ API KEY ---
+    private static final String GROQ_API_KEY = BuildConfig.GROQ_API_KEY;
     // ---------------------------------
 
     private TextView tvChatHistory;
@@ -79,8 +80,10 @@ public class AIAssistantActivity extends AppCompatActivity {
         updateUIForMode();
 
         if (isVoiceMode) {
+            // BLIND MODE: Auto-speak instruction
             speak("Voice Mode Enabled. Tap the mic to speak.");
         } else {
+            // DEAF MODE
             speak("Text Mode Enabled.");
         }
     }
@@ -144,8 +147,8 @@ public class AIAssistantActivity extends AppCompatActivity {
             return;
         }
 
-        // 3. OTHERWISE: ASK GEMINI
-        askGemini(input);
+        // 3. OTHERWISE: ASK GROQ
+        askGroq(input);
     }
 
     // --- FEATURE 1: EMERGENCY ---
@@ -154,7 +157,7 @@ public class AIAssistantActivity extends AppCompatActivity {
         addToChat("System: " + msg);
         speak(msg);
 
-        // Open Dialer with 911 (or 112) pre-filled
+        // Open Dialer with pre-filled number
         Intent intent = new Intent(Intent.ACTION_DIAL);
         intent.setData(Uri.parse("tel:7992384703"));
         startActivity(intent);
@@ -168,38 +171,75 @@ public class AIAssistantActivity extends AppCompatActivity {
         speak("I have saved that note.");
     }
 
-    // --- FEATURE 3: GEMINI CHAT ---
-    private void askGemini(String prompt) {
+    // --- FEATURE 3: GROQ CHAT (Using Llama 3) ---
+    private void askGroq(String prompt) {
         addToChat("System: Thinking...");
 
-        // Use new model name: gemini-1.5-flash
-        GenerativeModel gm = new GenerativeModel("gemini-1.5-flash", API_KEY);
-        GenerativeModelFutures model = GenerativeModelFutures.from(gm);
+        OkHttpClient client = new OkHttpClient();
+        
+        // Construct JSON Body
+        JSONObject jsonBody = new JSONObject();
+        try {
+            // Use Llama 3.3 Versatile - Current stable model (2025)
+            jsonBody.put("model", "llama-3.3-70b-versatile"); 
+            
+            JSONArray messages = new JSONArray();
+            JSONObject msg = new JSONObject();
+            msg.put("role", "user");
+            msg.put("content", "You are a helpful assistant for a blind user. Keep answers short, clear, and kind. " + prompt);
+            messages.put(msg);
+            
+            jsonBody.put("messages", messages);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        Content content = new Content.Builder()
-                .addText("You are a helpful assistant for a disabled user. Keep answers short, clear, and kind. Query: " + prompt)
+        RequestBody body = RequestBody.create(jsonBody.toString(), MediaType.get("application/json; charset=utf-8"));
+        
+        Request request = new Request.Builder()
+                .url("https://api.groq.com/openai/v1/chat/completions")
+                .addHeader("Authorization", "Bearer " + GROQ_API_KEY)
+                .addHeader("Content-Type", "application/json")
+                .post(body)
                 .build();
 
-        ListenableFuture<GenerateContentResponse> response = model.generateContent(content);
-
-        Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
+        client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onSuccess(GenerateContentResponse result) {
-                String text = result.getText();
-                runOnUiThread(() -> {
-                    addToChat("AI: " + text);
-                    speak(text);
+            public void onFailure(Call call, IOException e) {
+                 runOnUiThread(() -> {
+                    addToChat("Error: " + e.getMessage());
+                    speak("I could not connect to Groq.");
                 });
             }
 
             @Override
-            public void onFailure(Throwable t) {
-                runOnUiThread(() -> {
-                    addToChat("Error: " + t.getMessage());
-                    speak("I lost connection.");
-                });
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    try {
+                        String responseData = response.body().string();
+                        JSONObject json = new JSONObject(responseData);
+                        JSONArray choices = json.getJSONArray("choices");
+                        String text = choices.getJSONObject(0).getJSONObject("message").getString("content");
+                        
+                        runOnUiThread(() -> {
+                            addToChat("AI: " + text);
+                            speak(text);
+                        });
+                    } catch (JSONException e) {
+                         runOnUiThread(() -> {
+                            addToChat("Parsing Error");
+                            speak("I did not understand the response.");
+                        });
+                    }
+                } else {
+                     String errorBody = response.body().string();
+                     runOnUiThread(() -> {
+                        addToChat("Error " + response.code() + ": " + errorBody);
+                        speak("Groq returned an error.");
+                    });
+                }
             }
-        }, ContextCompat.getMainExecutor(this));
+        });
     }
 
     // --- HELPER FUNCTIONS ---

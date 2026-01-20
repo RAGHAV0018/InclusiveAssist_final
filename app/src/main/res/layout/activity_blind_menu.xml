@@ -65,6 +65,25 @@
             android:textSize="20sp"
             android:backgroundTint="#9C27B0"
             android:layout_marginBottom="15dp"/>
+            
+        <Button
+            android:id="@+id/btnScene"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:text="🖼  Scene Description"
+            android:textSize="20sp"
+            android:backgroundTint="#E91E63"
+            android:layout_marginBottom="15dp"/>
+            
+        <Button
+            android:id="@+id/btnVoiceControl"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:text="🎙  Voice Control"
+            android:textSize="20sp"
+            android:backgroundTint="#673AB7"
+            android:textColor="#FFFFFF"
+            android:layout_marginBottom="15dp"/>
 
     </LinearLayout>
 </ScrollView>

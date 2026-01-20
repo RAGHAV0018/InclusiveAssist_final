@@ -1,4 +1,3 @@
-
 package com.inclusive.assist;
 
 import android.Manifest;
@@ -45,17 +44,18 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * BlindModeActivity - Online Object Detection (Gemini 2.5 Flash)
- * Replaced ML Kit with Google Gemini API for more detailed descriptions.
+ * SceneDescriptionActivity - Detailed Scene Analysis (Gemini Pro)
+ * Uses a more powerful model for detailed scene descriptions.
  */
-public class BlindModeActivity extends AppCompatActivity {
+public class SceneDescriptionActivity extends AppCompatActivity {
 
-    private static final String TAG = "BlindModeActivity";
-    private static final int CAMERA_PERMISSION_REQUEST = 101;
+    private static final String TAG = "SceneDescActivity";
+    private static final int CAMERA_PERMISSION_REQUEST = 102;
     
     // --- GEMINI CONFIG ---
+    // Using valid key ...wHs and 2.5-flash model (same as Object Detection)
     private static final String GEMINI_API_KEY = BuildConfig.GEMINI_API_KEY;
-    private static final String GEMINI_MODEL = "gemini-2.5-flash"; // As requested
+    private static final String GEMINI_MODEL = "gemini-2.5-flash"; 
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent?key=" + GEMINI_API_KEY;
 
     private PreviewView previewView;
@@ -63,35 +63,33 @@ public class BlindModeActivity extends AppCompatActivity {
     private ExecutorService cameraExecutor;
     private TextToSpeech tts;
     
-    // Network Client
     private OkHttpClient client;
     private boolean isProcessing = false;
     private long lastAnalysisTime = 0;
-    private static final long ANALYSIS_DELAY = 1000; // 3 seconds between requests to avoid quota limit
+    private static final long ANALYSIS_DELAY = 4000; // Slower refresh for "Scene" mode (more expensive/detailed)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.activity_blind_mode);
+        setContentView(R.layout.activity_blind_mode); // Reusing the same layout (viewfinder + text)
 
         previewView = findViewById(R.id.viewFinder);
         tvDescription = findViewById(R.id.tvDescription);
         
         cameraExecutor = Executors.newSingleThreadExecutor();
         
-        // Initialize OkHttp with timeouts
         client = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(60, TimeUnit.SECONDS) // Longer timeout for Pro model
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
                 .build();
         
         tts = new TextToSpeech(this, status -> {
              if (status == TextToSpeech.SUCCESS) tts.setLanguage(Locale.US);
         });
 
-        tvDescription.setText("Initializing Camera...");
+        tvDescription.setText("Initializing Scene Scanner...");
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) 
                 == PackageManager.PERMISSION_GRANTED) {
@@ -128,7 +126,6 @@ public class BlindModeActivity extends AppCompatActivity {
         Preview preview = new Preview.Builder().build();
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
 
-        // Use RGBA_8888 for easier Bitmap conversion
         ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -148,18 +145,15 @@ public class BlindModeActivity extends AppCompatActivity {
     private void processImage(ImageProxy imageProxy) {
         long now = System.currentTimeMillis();
         
-        // Rate Limiting & Busy Check
         if (isProcessing || (now - lastAnalysisTime < ANALYSIS_DELAY)) {
             imageProxy.close();
             return;
         }
 
         try {
-            // 1. Convert ImageProxy to Bitmap
             Bitmap bitmap = Bitmap.createBitmap(imageProxy.getWidth(), imageProxy.getHeight(), Bitmap.Config.ARGB_8888);
             bitmap.copyPixelsFromBuffer(imageProxy.getPlanes()[0].getBuffer());
             
-            // 2. Rotate Bitmap (ImageAnalysis images are often unrotated)
             int rotationDegrees = imageProxy.getImageInfo().getRotationDegrees();
             if (rotationDegrees != 0) {
                 Matrix matrix = new Matrix();
@@ -167,29 +161,24 @@ public class BlindModeActivity extends AppCompatActivity {
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
             }
 
-            // 3. Compress to JPEG
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            // Scale down if necessary for speed/quota, e.g., to 640px width
+            // Gemini Pro can handle decent res, but for speed 800-1024 is good.
             int w = bitmap.getWidth();
             int h = bitmap.getHeight();
-            // Simple resize if too big - Optimized for Gemini Speed (640px is sufficient)
-            if (w > 640) {
-                 float scale = 640f / w;
-                 bitmap = Bitmap.createScaledBitmap(bitmap, 640, (int)(h * scale), true);
+            if (w > 800) {
+                 float scale = 800f / w;
+                 bitmap = Bitmap.createScaledBitmap(bitmap, 800, (int)(h * scale), true);
             }
             
-            // Lower quality to 60 for faster upload (negligible accuracy loss for objects)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 60, byteArrayOutputStream);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream);
             byte[] imageBytes = byteArrayOutputStream.toByteArray();
             String base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
             
-            // Lock processing
             isProcessing = true;
             lastAnalysisTime = now;
             
-            runOnUiThread(() -> tvDescription.setText("Analyzing..."));
+            runOnUiThread(() -> tvDescription.setText("Analyzing Scene..."));
 
-            // 4. Send to Gemini
             sendToGemini(base64Image);
 
         } catch (Exception e) {
@@ -206,13 +195,10 @@ public class BlindModeActivity extends AppCompatActivity {
             JSONObject content = new JSONObject();
             JSONArray parts = new JSONArray();
 
-            // Text Prompt
             JSONObject textPart = new JSONObject();
-            // Shorter prompt = faster generation
-            textPart.put("text", "Identify main object. 5 words max.");
+            textPart.put("text", "Describe this scene in detail for a blind person. Include objects, layout, and atmosphere. Keep it under 30 words.");
             parts.put(textPart);
 
-            // Image Data
             JSONObject imageBlob = new JSONObject();
             imageBlob.put("mime_type", "image/jpeg");
             imageBlob.put("data", base64Image);
@@ -257,7 +243,6 @@ public class BlindModeActivity extends AppCompatActivity {
                         String responseData = response.body().string();
                         JSONObject json = new JSONObject(responseData);
                         
-                        // Parse Candidates
                         JSONArray candidates = json.optJSONArray("candidates");
                         if (candidates != null && candidates.length() > 0) {
                             JSONObject content = candidates.getJSONObject(0).optJSONObject("content");
@@ -268,21 +253,31 @@ public class BlindModeActivity extends AppCompatActivity {
                                     
                                     runOnUiThread(() -> {
                                         tvDescription.setText(text);
-                                        // Update UI
                                         speak(text);
                                     });
                                 }
                             }
+                        } else {
+                            // Valid response but no candidates (Safety filter?)
+                             runOnUiThread(() -> tvDescription.setText("No description generated. Try moving."));
                         }
                     } catch (JSONException e) {
                         Log.e(TAG, "Parsing Error", e);
+                        runOnUiThread(() -> tvDescription.setText("Parsing Error"));
                     }
                 } else {
-                    Log.e(TAG, "Gemini Error: " + response.code() + " " + response.body().string());
+                    String errorBody = response.body() != null ? response.body().string() : "";
+                    Log.e(TAG, "Gemini Error: " + response.code() + " " + errorBody);
+                    runOnUiThread(() -> {
+                        if (response.code() == 404) {
+                             tvDescription.setText("Error 404: Model unavailable. Check API Key.");
+                        } else {
+                             tvDescription.setText("Error " + response.code() + ": " + errorBody);
+                        }
+                    });
                 }
                 
-                // Release lock
-                isProcessing = false;
+                isProcessing = false; 
             }
         });
     }
