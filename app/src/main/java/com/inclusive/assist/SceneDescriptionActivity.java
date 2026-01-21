@@ -44,19 +44,18 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * SceneDescriptionActivity - Detailed Scene Analysis (Gemini Pro)
- * Uses a more powerful model for detailed scene descriptions.
+ * SceneDescriptionActivity - Detailed Scene Analysis (Groq Llama Vision)
+ * Uses Groq's Llama 4 Scout for detailed scene descriptions.
  */
 public class SceneDescriptionActivity extends AppCompatActivity {
 
     private static final String TAG = "SceneDescActivity";
     private static final int CAMERA_PERMISSION_REQUEST = 102;
     
-    // --- GEMINI CONFIG ---
-    // Using valid key ...wHs and 2.5-flash model (same as Object Detection)
-    private static final String GEMINI_API_KEY = BuildConfig.GEMINI_API_KEY;
-    private static final String GEMINI_MODEL = "gemini-2.5-flash"; 
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent?key=" + GEMINI_API_KEY;
+    // --- GROQ CONFIG ---
+    private static final String GROQ_API_KEY = BuildConfig.GROQ_API_KEY;
+    private static final String GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"; // Free vision model
+    private static final String API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
     private PreviewView previewView;
     private TextView tvDescription;
@@ -66,7 +65,7 @@ public class SceneDescriptionActivity extends AppCompatActivity {
     private OkHttpClient client;
     private boolean isProcessing = false;
     private long lastAnalysisTime = 0;
-    private static final long ANALYSIS_DELAY = 4000; // Slower refresh for "Scene" mode (more expensive/detailed)
+    private static final long ANALYSIS_DELAY = 10000; // 10 seconds between analyses to prevent TTS overlap
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,26 +191,33 @@ public class SceneDescriptionActivity extends AppCompatActivity {
     private void sendToGemini(String base64Image) {
         JSONObject jsonBody = new JSONObject();
         try {
-            JSONObject content = new JSONObject();
-            JSONArray parts = new JSONArray();
-
-            JSONObject textPart = new JSONObject();
-            textPart.put("text", "Describe this scene in detail for a blind person. Include objects, layout, and atmosphere. Keep it under 30 words.");
-            parts.put(textPart);
-
-            JSONObject imageBlob = new JSONObject();
-            imageBlob.put("mime_type", "image/jpeg");
-            imageBlob.put("data", base64Image);
+            // Groq API format
+            jsonBody.put("model", GROQ_MODEL);
             
-            JSONObject imagePart = new JSONObject();
-            imagePart.put("inline_data", imageBlob);
-            parts.put(imagePart);
-
-            content.put("parts", parts);
+            JSONArray messages = new JSONArray();
+            JSONObject message = new JSONObject();
+            message.put("role", "user");
             
-            JSONArray contents = new JSONArray();
-            contents.put(content);
-            jsonBody.put("contents", contents);
+            // Content array with text and image
+            JSONArray contentArray = new JSONArray();
+            
+            // Text part
+            JSONObject textContent = new JSONObject();
+            textContent.put("type", "text");
+            textContent.put("text", "Describe this scene in detail for a blind person. Include objects, layout, and atmosphere. Keep it under 30 words.");
+            contentArray.put(textContent);
+            
+            // Image part
+            JSONObject imageContent = new JSONObject();
+            imageContent.put("type", "image_url");
+            JSONObject imageUrl = new JSONObject();
+            imageUrl.put("url", "data:image/jpeg;base64," + base64Image);
+            imageContent.put("image_url", imageUrl);
+            contentArray.put(imageContent);
+            
+            message.put("content", contentArray);
+            messages.put(message);
+            jsonBody.put("messages", messages);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -223,15 +229,18 @@ public class SceneDescriptionActivity extends AppCompatActivity {
         
         Request request = new Request.Builder()
                 .url(API_URL)
+                .addHeader("Authorization", "Bearer " + GROQ_API_KEY)
+                .addHeader("Content-Type", "application/json")
                 .post(body)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(TAG, "Gemini Request Failed", e);
+                Log.e(TAG, "Groq Request Failed", e);
                 runOnUiThread(() -> {
                      tvDescription.setText("Connection Failed");
+                     speak("Connection failed");
                      isProcessing = false;
                 });
             }
@@ -243,37 +252,50 @@ public class SceneDescriptionActivity extends AppCompatActivity {
                         String responseData = response.body().string();
                         JSONObject json = new JSONObject(responseData);
                         
-                        JSONArray candidates = json.optJSONArray("candidates");
-                        if (candidates != null && candidates.length() > 0) {
-                            JSONObject content = candidates.getJSONObject(0).optJSONObject("content");
-                            if (content != null) {
-                                JSONArray parts = content.optJSONArray("parts");
-                                if (parts != null && parts.length() > 0) {
-                                    String text = parts.getJSONObject(0).getString("text");
-                                    
-                                    runOnUiThread(() -> {
-                                        tvDescription.setText(text);
-                                        speak(text);
-                                    });
-                                }
+                        // Parse Groq response format
+                        JSONArray choices = json.optJSONArray("choices");
+                        if (choices != null && choices.length() > 0) {
+                            JSONObject choice = choices.getJSONObject(0);
+                            JSONObject message = choice.optJSONObject("message");
+                            if (message != null) {
+                                String text = message.optString("content", "No description available");
+                                
+                                runOnUiThread(() -> {
+                                    tvDescription.setText(text);
+                                    speak(text);
+                                });
                             }
                         } else {
-                            // Valid response but no candidates (Safety filter?)
-                             runOnUiThread(() -> tvDescription.setText("No description generated. Try moving."));
+                            runOnUiThread(() -> {
+                                tvDescription.setText("No description generated. Try moving.");
+                                speak("No description");
+                            });
                         }
                     } catch (JSONException e) {
                         Log.e(TAG, "Parsing Error", e);
-                        runOnUiThread(() -> tvDescription.setText("Parsing Error"));
+                        runOnUiThread(() -> {
+                            tvDescription.setText("Parsing Error");
+                            speak("Error occurred");
+                        });
                     }
                 } else {
                     String errorBody = response.body() != null ? response.body().string() : "";
-                    Log.e(TAG, "Gemini Error: " + response.code() + " " + errorBody);
+                    Log.e(TAG, "Groq Error: " + response.code() + " " + errorBody);
                     runOnUiThread(() -> {
-                        if (response.code() == 404) {
-                             tvDescription.setText("Error 404: Model unavailable. Check API Key.");
+                        String userMessage = "Connection Error.";
+                        if (response.code() == 401) {
+                             userMessage = "Invalid API key";
+                        } else if (response.code() == 404) {
+                             userMessage = "Error: AI Model unavailable. Please check settings.";
+                        } else if (response.code() == 429) {
+                             userMessage = "Rate limit exceeded. Please try again later.";
+                        } else if (response.code() == 503) {
+                             userMessage = "Server is busy. Please try again in a moment.";
                         } else {
-                             tvDescription.setText("Error " + response.code() + ": " + errorBody);
+                             userMessage = "Error " + response.code() + ": Failed to get description.";
                         }
+                        tvDescription.setText(userMessage);
+                        speak(userMessage);
                     });
                 }
                 

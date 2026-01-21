@@ -45,18 +45,18 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 /**
- * BlindModeActivity - Online Object Detection (Gemini 2.5 Flash)
- * Replaced ML Kit with Google Gemini API for more detailed descriptions.
+ * BlindModeActivity - Online Object Detection (Groq Llama Vision)
+ * Uses Groq's llama-3.2-11b-vision-instruct model for object detection.
  */
 public class BlindModeActivity extends AppCompatActivity {
 
     private static final String TAG = "BlindModeActivity";
     private static final int CAMERA_PERMISSION_REQUEST = 101;
     
-    // --- GEMINI CONFIG ---
-    private static final String GEMINI_API_KEY = BuildConfig.GEMINI_API_KEY;
-    private static final String GEMINI_MODEL = "gemini-2.5-flash"; // As requested
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent?key=" + GEMINI_API_KEY;
+    // --- GROQ CONFIG ---
+    private static final String GROQ_API_KEY = BuildConfig.GROQ_API_KEY;
+    private static final String GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"; // Groq's vision model
+    private static final String API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
     private PreviewView previewView;
     private TextView tvDescription;
@@ -66,8 +66,9 @@ public class BlindModeActivity extends AppCompatActivity {
     // Network Client
     private OkHttpClient client;
     private boolean isProcessing = false;
+    private boolean isSpeaking = false;
     private long lastAnalysisTime = 0;
-    private static final long ANALYSIS_DELAY = 1000; // 3 seconds between requests to avoid quota limit
+    private static final long ANALYSIS_DELAY = 5000; // 5 seconds between requests to allow TTS to complete
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,7 +89,24 @@ public class BlindModeActivity extends AppCompatActivity {
                 .build();
         
         tts = new TextToSpeech(this, status -> {
-             if (status == TextToSpeech.SUCCESS) tts.setLanguage(Locale.US);
+             if (status == TextToSpeech.SUCCESS) {
+                 tts.setLanguage(Locale.US);
+                 // Set listener to track when TTS finishes speaking
+                 tts.setOnUtteranceProgressListener(new android.speech.tts.UtteranceProgressListener() {
+                     @Override
+                     public void onStart(String utteranceId) {
+                         isSpeaking = true;
+                     }
+                     @Override
+                     public void onDone(String utteranceId) {
+                         isSpeaking = false;
+                     }
+                     @Override
+                     public void onError(String utteranceId) {
+                         isSpeaking = false;
+                     }
+                 });
+             }
         });
 
         tvDescription.setText("Initializing Camera...");
@@ -203,29 +221,33 @@ public class BlindModeActivity extends AppCompatActivity {
     private void sendToGemini(String base64Image) {
         JSONObject jsonBody = new JSONObject();
         try {
-            JSONObject content = new JSONObject();
-            JSONArray parts = new JSONArray();
-
-            // Text Prompt
-            JSONObject textPart = new JSONObject();
-            // Shorter prompt = faster generation
-            textPart.put("text", "Identify main object. 5 words max.");
-            parts.put(textPart);
-
-            // Image Data
-            JSONObject imageBlob = new JSONObject();
-            imageBlob.put("mime_type", "image/jpeg");
-            imageBlob.put("data", base64Image);
+            // Groq API format
+            jsonBody.put("model", GROQ_MODEL);
             
-            JSONObject imagePart = new JSONObject();
-            imagePart.put("inline_data", imageBlob);
-            parts.put(imagePart);
-
-            content.put("parts", parts);
+            JSONArray messages = new JSONArray();
+            JSONObject message = new JSONObject();
+            message.put("role", "user");
             
-            JSONArray contents = new JSONArray();
-            contents.put(content);
-            jsonBody.put("contents", contents);
+            // Content array with text and image
+            JSONArray contentArray = new JSONArray();
+            
+            // Text part
+            JSONObject textContent = new JSONObject();
+            textContent.put("type", "text");
+            textContent.put("text", "Identify the main object in this image. Respond in 5 words or less.");
+            contentArray.put(textContent);
+            
+            // Image part
+            JSONObject imageContent = new JSONObject();
+            imageContent.put("type", "image_url");
+            JSONObject imageUrl = new JSONObject();
+            imageUrl.put("url", "data:image/jpeg;base64," + base64Image);
+            imageContent.put("image_url", imageUrl);
+            contentArray.put(imageContent);
+            
+            message.put("content", contentArray);
+            messages.put(message);
+            jsonBody.put("messages", messages);
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -237,15 +259,18 @@ public class BlindModeActivity extends AppCompatActivity {
         
         Request request = new Request.Builder()
                 .url(API_URL)
+                .addHeader("Authorization", "Bearer " + GROQ_API_KEY)
+                .addHeader("Content-Type", "application/json")
                 .post(body)
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                Log.e(TAG, "Gemini Request Failed", e);
+                Log.e(TAG, "Groq Request Failed", e);
                 runOnUiThread(() -> {
                      tvDescription.setText("Connection Failed");
+                     speak("Connection failed");
                      isProcessing = false;
                 });
             }
@@ -257,28 +282,47 @@ public class BlindModeActivity extends AppCompatActivity {
                         String responseData = response.body().string();
                         JSONObject json = new JSONObject(responseData);
                         
-                        // Parse Candidates
-                        JSONArray candidates = json.optJSONArray("candidates");
-                        if (candidates != null && candidates.length() > 0) {
-                            JSONObject content = candidates.getJSONObject(0).optJSONObject("content");
-                            if (content != null) {
-                                JSONArray parts = content.optJSONArray("parts");
-                                if (parts != null && parts.length() > 0) {
-                                    String text = parts.getJSONObject(0).getString("text");
-                                    
-                                    runOnUiThread(() -> {
-                                        tvDescription.setText(text);
-                                        // Update UI
-                                        speak(text);
-                                    });
-                                }
+                        // Parse Groq response format
+                        JSONArray choices = json.optJSONArray("choices");
+                        if (choices != null && choices.length() > 0) {
+                            JSONObject choice = choices.getJSONObject(0);
+                            JSONObject message = choice.optJSONObject("message");
+                            if (message != null) {
+                                String text = message.optString("content", "No object detected");
+                                
+                                runOnUiThread(() -> {
+                                    tvDescription.setText(text);
+                                    speak(text);
+                                });
                             }
+                        } else {
+                            runOnUiThread(() -> {
+                                tvDescription.setText("No response from AI");
+                                speak("No response");
+                            });
                         }
                     } catch (JSONException e) {
                         Log.e(TAG, "Parsing Error", e);
+                        runOnUiThread(() -> {
+                            tvDescription.setText("Error parsing response");
+                            speak("Error occurred");
+                        });
                     }
                 } else {
-                    Log.e(TAG, "Gemini Error: " + response.code() + " " + response.body().string());
+                    String errorBody = response.body() != null ? response.body().string() : "";
+                    Log.e(TAG, "Groq Error: " + response.code() + " " + errorBody);
+                    runOnUiThread(() -> {
+                        String userMessage = "Error occurred";
+                        if (response.code() == 401) {
+                            userMessage = "Invalid API key";
+                        } else if (response.code() == 429) {
+                            userMessage = "Rate limit exceeded";
+                        } else if (response.code() == 503) {
+                            userMessage = "Service unavailable";
+                        }
+                        tvDescription.setText(userMessage);
+                        speak(userMessage);
+                    });
                 }
                 
                 // Release lock
@@ -288,8 +332,11 @@ public class BlindModeActivity extends AppCompatActivity {
     }
 
     private void speak(String text) {
-        if (tts != null) {
-            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+        if (tts != null && !isSpeaking) {
+            // Create a unique utterance ID
+            String utteranceId = String.valueOf(System.currentTimeMillis());
+            android.os.Bundle params = new android.os.Bundle();
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId);
         }
     }
 }

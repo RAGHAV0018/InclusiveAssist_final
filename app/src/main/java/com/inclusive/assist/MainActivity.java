@@ -61,7 +61,46 @@ public class MainActivity extends AppCompatActivity {
             public void onEndOfSpeech() {}
             @Override
             public void onError(int error) {
-                 speak("Try again.");
+                 String message;
+                 switch (error) {
+                     case SpeechRecognizer.ERROR_AUDIO:
+                         message = "Audio recording error";
+                         break;
+                     case SpeechRecognizer.ERROR_CLIENT:
+                         message = "Client side error";
+                         break;
+                     case SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS:
+                         message = "Insufficient permissions";
+                         break;
+                     case SpeechRecognizer.ERROR_NETWORK:
+                         message = "Network error";
+                         break;
+                     case SpeechRecognizer.ERROR_NETWORK_TIMEOUT:
+                         message = "Network timeout";
+                         break;
+                     case SpeechRecognizer.ERROR_NO_MATCH:
+                         message = "I didn't catch that";
+                         break;
+                     case SpeechRecognizer.ERROR_RECOGNIZER_BUSY:
+                         message = "Service busy";
+                         break;
+                     case SpeechRecognizer.ERROR_SERVER:
+                         message = "Server error";
+                         break;
+                     case SpeechRecognizer.ERROR_SPEECH_TIMEOUT:
+                         message = "No speech input";
+                         break;
+                     default:
+                         message = "Error occurred";
+                         break;
+                 }
+                 // Only speak if it's not a common "no speech" timeout which happens often in background
+                 if (error != SpeechRecognizer.ERROR_SPEECH_TIMEOUT && error != SpeechRecognizer.ERROR_NO_MATCH) {
+                     speak(message);
+                 } else {
+                     // For no match/timeout, maybe just a short beep or silence is better than "Try again" loop
+                     // speak("I didn't hear anything.");
+                 }
             }
             @Override
             public void onResults(Bundle results) {
@@ -127,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
             btnBlind.performClick();
         } else if (command.contains("hearing") || command.contains("deaf")) {
             btnDeaf.performClick();
-        } else if (command.contains("read") && command.contains("text")) {
+        } else if (command.contains("read") || command.contains("text")) {
              speak("Opening Text Reader");
              startActivity(new Intent(MainActivity.this, ReadTextActivity.class));
         } else if (command.contains("currency") || command.contains("money")) {
@@ -135,6 +174,27 @@ public class MainActivity extends AppCompatActivity {
              startActivity(new Intent(MainActivity.this, CurrencyActivity.class));
         } else if (command.contains("where") || command.contains("location")) {
              startActivity(new Intent(MainActivity.this, LocationActivity.class));
+        } else if (command.contains("scene") || command.contains("describe")) {
+             speak("Opening Scene Description");
+             startActivity(new Intent(MainActivity.this, SceneDescriptionActivity.class));
+        } else if (command.contains("object") || command.contains("detect")) {
+             speak("Opening Object Detection");
+             startActivity(new Intent(MainActivity.this, BlindModeActivity.class));
+        } else if (command.contains("assistant") || command.contains("ai")) {
+             speak("Opening AI Assistant");
+             startActivity(new Intent(MainActivity.this, AIAssistantActivity.class));
+        } else if (command.contains("light")) {
+             speak("Opening Light Detector");
+             startActivity(new Intent(MainActivity.this, LightDetectorActivity.class));
+        } else if (command.contains("bus") || command.contains("route")) {
+             speak("Opening Bus Routes");
+             startActivity(new Intent(MainActivity.this, BusRouteActivity.class));
+        } else if (command.contains("quick") || command.contains("message")) {
+             speak("Opening Quick Messages");
+             startActivity(new Intent(MainActivity.this, QuickTextActivity.class));
+        } else if (command.contains("sound") || command.contains("alert")) {
+             speak("Opening Sound Alert");
+             startActivity(new Intent(MainActivity.this, SoundAlertActivity.class));
         } else {
             speak("Command not understood.");
         }

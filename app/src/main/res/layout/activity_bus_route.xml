@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#000000">
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select Bus Route"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/btnVoiceSearch"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:text="🎤 Speak Bus Number"
+        android:textSize="20sp"
+        android:backgroundTint="#FF9800"
+        android:contentDescription="Tap to Speak Bus Number"
+        android:layout_marginBottom="20dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Available Routes:"
+        android:textColor="#AAAAAA"
+        android:textSize="18sp"
+        android:paddingBottom="10dp"/>
+
+    <ListView
+        android:id="@+id/lvBusRoutes"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="#444444"
+        android:dividerHeight="1dp"/>
+
+</LinearLayout>

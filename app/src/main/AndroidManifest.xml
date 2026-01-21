@@ -51,6 +51,11 @@
 
         <activity android:name=".ClassroomModeActivity" android:exported="false" />
 
+        <activity android:name=".ClassroomModeActivity" android:exported="false" />
+
+        <activity android:name=".BusRouteActivity" android:exported="false" />
+        <activity android:name=".BusStopActivity" android:exported="false" />
+
         <activity android:name=".DestinationActivity" android:exported="false" />
     </application>
 

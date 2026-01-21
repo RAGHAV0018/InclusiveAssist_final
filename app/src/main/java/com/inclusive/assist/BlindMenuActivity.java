@@ -49,7 +49,7 @@ public class BlindMenuActivity extends AppCompatActivity {
         sensorManager = (android.hardware.SensorManager) getSystemService(android.content.Context.SENSOR_SERVICE);
         shakeDetector = new ShakeDetector();
         shakeDetector.setOnShakeListener(count -> {
-            if (count >= 5) {
+            if (count >= 3) {
                 SOSHelper.triggerSOS(BlindMenuActivity.this, tts);
             }
         });
@@ -77,7 +77,9 @@ public class BlindMenuActivity extends AppCompatActivity {
             @Override
             public void onError(int error) { 
                 if (!isNavigating) {
-                    speak("Try again."); 
+                    // speak("I didn't hear that."); 
+                    // Keeping silent on error is often better for continuous menus, 
+                    // or use a distinct error sound. 
                 }
             }
             @Override
@@ -165,6 +167,16 @@ public class BlindMenuActivity extends AppCompatActivity {
                 startActivity(new Intent(this, SceneDescriptionActivity.class));
             });
         }
+
+        // 8. BUS ROUTE BUTTON
+        Button btnBus = findViewById(R.id.btnBus);
+        if (btnBus != null) {
+            btnBus.setOnClickListener(v -> {
+                speak("Opening Bus Routes");
+                isNavigating = true;
+                startActivity(new Intent(this, BusRouteActivity.class));
+            });
+        }
     }
     
     private void listen() {
@@ -209,6 +221,24 @@ public class BlindMenuActivity extends AppCompatActivity {
              isNavigating = true;
              if (speechRecognizer != null) speechRecognizer.cancel();
              startActivity(new Intent(this, SceneDescriptionActivity.class));
+        } else if (command.contains("bus") || command.contains("route")) {
+             speak("Opening Bus Routes");
+             isNavigating = true;
+             if (speechRecognizer != null) speechRecognizer.cancel();
+             startActivity(new Intent(this, BusRouteActivity.class));
+        } else if (command.contains("where") || command.contains("location")) {
+             speak("Opening Location");
+             isNavigating = true;
+             if (speechRecognizer != null) speechRecognizer.cancel();
+             startActivity(new Intent(this, LocationActivity.class));
+        } else if (command.contains("quick") || command.contains("message")) {
+             speak("Opening Quick Messages");
+             isNavigating = true;
+             if (speechRecognizer != null) speechRecognizer.cancel();
+             startActivity(new Intent(this, QuickTextActivity.class));
+        } else if (command.contains("help") || command.contains("sos")) {
+             speak("Sending SOS");
+             SOSHelper.triggerSOS(this, tts);
         } else {
             speak("Order not understood.");
         }

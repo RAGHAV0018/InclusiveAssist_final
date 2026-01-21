@@ -28,8 +28,10 @@ import java.util.Locale;
 
 public class DestinationActivity extends AppCompatActivity {
 
-    private static final double DEST_LAT = 12.918026;
-    private static final double DEST_LON = 77.500007;
+    private double destLat = 12.918026; // Default
+    private double destLon = 77.500007; // Default
+    private String destName = "Destination";
+
     private static final float TRIGGER_DISTANCE_METERS = 500f;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
@@ -48,6 +50,15 @@ public class DestinationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_destination);
 
+        // --- GET DYNAMIC DESTINATION ---
+        if (getIntent().hasExtra("DEST_LAT") && getIntent().hasExtra("DEST_LON")) {
+            destLat = getIntent().getDoubleExtra("DEST_LAT", 0);
+            destLon = getIntent().getDoubleExtra("DEST_LON", 0);
+            if (getIntent().hasExtra("DEST_NAME")) {
+                destName = getIntent().getStringExtra("DEST_NAME");
+            }
+        }
+
         tvStatus = findViewById(R.id.tvStatus);
         btnToggle = findViewById(R.id.btnToggle);
         
@@ -58,8 +69,11 @@ public class DestinationActivity extends AppCompatActivity {
         tts = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS) {
                 tts.setLanguage(Locale.US);
+                speak("Navigation to " + destName + " is ready. Press Start.");
             }
         });
+
+        tvStatus.setText("Target: " + destName);
 
         // Setup Location Callback
         locationCallback = new LocationCallback() {
@@ -101,25 +115,25 @@ public class DestinationActivity extends AppCompatActivity {
         isTracking = true;
         btnToggle.setText("STOP TRACKING");
         btnToggle.setBackgroundColor(0xFFFF0000); // Red
-        tvStatus.setText("Distance: Calculating...");
-        speak("Location tracking started.");
+        tvStatus.setText("Distance to " + destName + ": Calculating...");
+        speak("Tracking started used " + destName);
     }
 
     private void stopTracking() {
         fusedLocationClient.removeLocationUpdates(locationCallback);
         isTracking = false;
-        btnToggle.setText("START ALARM");
+        btnToggle.setText("START TRACKING"); // Fixed Label
         btnToggle.setBackgroundColor(0xFF4CAF50); // Green
-        tvStatus.setText("Distance: Stopped");
-        speak("Location tracking stopped.");
+        tvStatus.setText("Tracking Stopped");
+        speak("Tracking stopped.");
     }
 
     private void handleLocationUpdate(Location currentLocation) {
         float[] results = new float[1];
-        Location.distanceBetween(currentLocation.getLatitude(), currentLocation.getLongitude(), DEST_LAT, DEST_LON, results);
+        Location.distanceBetween(currentLocation.getLatitude(), currentLocation.getLongitude(), destLat, destLon, results);
         float distanceInMeters = results[0];
 
-        tvStatus.setText(String.format(Locale.US, "Distance: %.0f meters", distanceInMeters));
+        tvStatus.setText(String.format(Locale.US, "%s\nDistance: %.0f meters", destName, distanceInMeters));
 
         if (distanceInMeters < TRIGGER_DISTANCE_METERS) {
             triggerAlarm();
@@ -127,19 +141,19 @@ public class DestinationActivity extends AppCompatActivity {
     }
 
     private void triggerAlarm() {
-        // Stop tracking immediately to save battery (and prevent multiple triggers)
+        // Stop tracking immediately
         stopTracking();
 
         // 1. Text to Speech
-        String message = "Wake up! You are approaching your destination!";
+        String message = "Arrived at " + destName + ". Please get off.";
         speak(message);
 
         // 2. Vibrate Heavily
         if (vibrator != null) {
-            long[] pattern = {0, 1000, 500, 1000, 500, 1000}; // Wait 0, Vibrate 1s, Pause 0.5s, Vibrate 1s...
+            long[] pattern = {0, 1000, 500, 1000, 500, 1000}; 
             
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1)); // -1 means do not repeat
+                vibrator.vibrate(VibrationEffect.createWaveform(pattern, -1)); 
             } else {
                 vibrator.vibrate(pattern, -1);
             }

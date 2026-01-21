@@ -1,0 +1,122 @@
+{
+    "routes": [
+        {
+            "bus_number": "500-D",
+            "description": "Silk Board to Hebbal",
+            "stops": [
+                {
+                    "name": "Central Silk Board",
+                    "lat": 12.9177,
+                    "lon": 77.6238
+                },
+                {
+                    "name": "HSR Layout",
+                    "lat": 12.9116,
+                    "lon": 77.6381
+                },
+                {
+                    "name": "Agara Lake",
+                    "lat": 12.9255,
+                    "lon": 77.6465
+                },
+                {
+                    "name": "Ecospace",
+                    "lat": 12.9279,
+                    "lon": 77.6750
+                },
+                {
+                    "name": "Marathahalli Bridge",
+                    "lat": 12.9569,
+                    "lon": 77.7011
+                },
+                {
+                    "name": "KR Puram",
+                    "lat": 13.0039,
+                    "lon": 77.6881
+                },
+                {
+                    "name": "Hebbal",
+                    "lat": 13.0382,
+                    "lon": 77.5919
+                }
+            ]
+        },
+        {
+            "bus_number": "335-E",
+            "description": "Majestic to Whitefield",
+            "stops": [
+                {
+                    "name": "Majestic Bus Stand",
+                    "lat": 12.9766,
+                    "lon": 77.5713
+                },
+                {
+                    "name": "Corporation",
+                    "lat": 12.9678,
+                    "lon": 77.5891
+                },
+                {
+                    "name": "Domlur Bridge",
+                    "lat": 12.9610,
+                    "lon": 77.6387
+                },
+                {
+                    "name": "HAL Main Gate",
+                    "lat": 12.9575,
+                    "lon": 77.6653
+                },
+                {
+                    "name": "Marathahalli",
+                    "lat": 12.9554,
+                    "lon": 77.7051
+                },
+                {
+                    "name": "Kundalahalli Gate",
+                    "lat": 12.9686,
+                    "lon": 77.7219
+                },
+                {
+                    "name": "ITPL",
+                    "lat": 12.9892,
+                    "lon": 77.7288
+                },
+                {
+                    "name": "Whitefield",
+                    "lat": 12.9698,
+                    "lon": 77.7499
+                }
+            ]
+        },
+        {
+            "bus_number": "KIA-8",
+            "description": "Electronic City to Airport",
+            "stops": [
+                {
+                    "name": "Electronic City",
+                    "lat": 12.8452,
+                    "lon": 77.6602
+                },
+                {
+                    "name": "Silk Board",
+                    "lat": 12.9177,
+                    "lon": 77.6238
+                },
+                {
+                    "name": "Koramangala",
+                    "lat": 12.9279,
+                    "lon": 77.6271
+                },
+                {
+                    "name": "Mekhri Circle",
+                    "lat": 13.0135,
+                    "lon": 77.5855
+                },
+                {
+                    "name": "Airport",
+                    "lat": 13.1986,
+                    "lon": 77.7066
+                }
+            ]
+        }
+    ]
+}
